@@ -1,0 +1,19 @@
+syntax = "proto3";
+option csharp_namespace = "Fintech.Protos";
+package fintech.payments;
+
+
+service Payments {
+	rpc GetPaymentStatus(GetPaymentStatusRequest) returns (GetPaymentStatusResponse);
+}
+
+
+message GetPaymentStatusRequest {
+	string paymentId = 1;
+}
+
+
+message GetPaymentStatusResponse {
+	string paymentId = 1;
+	string status = 2;
+}

@@ -1,0 +1,37 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: "P@ssw0rd123!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  payments:
+    build:
+      context: ./src/PaymentsService
+      dockerfile: Dockerfile
+    ports:
+      - "5001:80"
+    environment:
+      # connection string inside container → use service name "postgres"
+      - ConnectionStrings__PaymentsDatabase=Host=postgres;Port=5432;Database=payments;Username=postgres;Password=postgres
+      # rabbitmq inside docker uses service name "rabbitmq"
+      - RABBITMQ_URI=amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      - postgres
+      - rabbitmq
