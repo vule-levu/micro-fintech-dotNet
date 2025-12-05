@@ -1,4 +1,4 @@
-# micro-fintech-dotNet
+# micro-fintech-dotNet — WIP (cooking in the code kitchen)
 A small distributed system built with **.NET 8**, demonstrating microservices, messaging patterns, and multi-database integration.  
 This project serves as a focused backend engineering showcase.
 
