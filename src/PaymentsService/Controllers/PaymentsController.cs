@@ -4,6 +4,8 @@ using PaymentsService.Domain.Entities;
 using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
+using AccountsService.Grpc;
+
 
 [ApiController]
 [Route("api/[controller]")]
@@ -11,11 +13,34 @@ public class PaymentsController : ControllerBase
 {
     private readonly PaymentsDbContext _db;
 
-    public PaymentsController(PaymentsDbContext db) => _db = db;
+    //public PaymentsController(PaymentsDbContext db) => _db = db;
+
+    private readonly AccountsGrpc.AccountsGrpcClient _accountsClient;
+
+    public PaymentsController(
+        PaymentsDbContext db,
+        AccountsGrpc.AccountsGrpcClient accountsClient)
+    {
+        _db = db;
+        _accountsClient = accountsClient;
+    }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreatePaymentDto dto)
     {
+        // 1️.Validate account via gRPC
+        var accountResponse = await _accountsClient.GetAccountAsync(
+            new GetAccountRequest
+            {
+                AccountId = dto.AccountId.ToString()
+            });
+
+        if (!accountResponse.Exists)
+        {
+            return BadRequest("Account does not exist");
+        }
+
+        // 2️.Continue normal payment flow
         var payment = new Payment
         {
             Id = Guid.NewGuid(),
@@ -29,19 +54,18 @@ public class PaymentsController : ControllerBase
         _db.Payments.Add(payment);
         await _db.SaveChangesAsync();
 
-        // Publish event to RabbitMQ (best-effort; do not fail the request if publish fails)
         try
         {
             PublishPaymentCreatedEvent(payment);
         }
-        catch (Exception ex)
+        catch
         {
-            // Log the exception in a real app. For demo, just swallow so API still returns 201.
-            // e.g., _logger.LogWarning(ex, "Failed to publish PaymentCreated event");
+            // swallow for demo
         }
 
         return CreatedAtAction(nameof(GetById), new { id = payment.Id }, payment);
     }
+
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)

@@ -1,6 +1,9 @@
 
 using Microsoft.EntityFrameworkCore;
 using PaymentsService.Infrastructure;
+using Grpc.Net.Client;
+
+using AccountsService.Grpc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +19,11 @@ builder.Services.AddDbContext<PaymentsDbContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddGrpcClient<AccountsGrpc.AccountsGrpcClient>(o =>
+{
+    o.Address = new Uri("http://localhost:6001"); // MUST be the gRPC port
+});
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
