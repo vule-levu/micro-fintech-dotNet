@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "AccountsService.Grpc";
+
+service AccountsGrpc {
+  rpc GetAccount (GetAccountRequest) returns (GetAccountResponse);
+}
+
+message GetAccountRequest {
+  string accountId = 1;
+}
+
+message GetAccountResponse {
+  bool exists = 1;
+  string accountId = 2;
+  string owner = 3;
+  double balance = 4;
+}
