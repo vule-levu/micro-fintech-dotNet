@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Micro Fintech Demo</title>
+</head>
+<body>
+    <h2>Create Account</h2>
+    <input id="owner" placeholder="Owner name" />
+    <button onclick="createAccount()">Create</button>
+
+    <h2>Send Payment</h2>
+    <input id="accountId" placeholder="Account ID" />
+    <input id="amount" placeholder="Amount" />
+    <button onclick="sendPayment()">Send</button>
+
+    <h2>Account Balance</h2>
+    <button onclick="checkBalance()">Check</button>
+
+    <pre id="output"></pre>
+
+    <script>
+    const API_ACCOUNTS = "http://localhost:6002/api/accounts";
+    const API_PAYMENTS = "http://localhost:5183/api/payments";
+
+    async function createAccount() {
+      const owner = document.getElementById("owner").value;
+
+      const res = await fetch(API_ACCOUNTS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ owner, balance: 100 })
+      });
+
+      const data = await res.json();
+      document.getElementById("accountId").value = data.id;
+      log(data);
+    }
+
+    async function sendPayment() {
+      const accountId = document.getElementById("accountId").value;
+      const amount = parseFloat(document.getElementById("amount").value);
+
+      const res = await fetch(API_PAYMENTS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accountId, amount, currency: "USD" })
+      });
+
+      const data = await res.json();
+      log(data);
+    }
+
+    async function checkBalance() {
+      const accountId = document.getElementById("accountId").value;
+
+      const res = await fetch(`${API_ACCOUNTS}/${accountId}`);
+      const data = await res.json();
+
+      log(data);
+    }
+
+    function log(data) {
+      document.getElementById("output").textContent =
+        JSON.stringify(data, null, 2);
+    }
+    </script>
+</body>
+</html>
