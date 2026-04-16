@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using AccountsService.Infrastructure;
 using AccountsService.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -9,7 +10,7 @@ public class AccountsController : ControllerBase
     private readonly AccountsDbContext _db;
     public AccountsController(AccountsDbContext db) => _db = db;
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var a = await _db.Accounts.FindAsync(id);
@@ -24,6 +25,12 @@ public class AccountsController : ControllerBase
         _db.Accounts.Add(a);
         await _db.SaveChangesAsync();
         return CreatedAtAction(nameof(GetById), new { id = a.Id }, a);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        return Ok(await _db.Accounts.ToListAsync());
     }
 }
 
