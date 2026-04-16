@@ -24,8 +24,18 @@ builder.Services.AddGrpcClient<AccountsGrpc.AccountsGrpcClient>(o =>
 {
     o.Address = new Uri("http://localhost:6001"); // MUST be the gRPC port
 });
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 var app = builder.Build();
+app.UseCors("AllowAll");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

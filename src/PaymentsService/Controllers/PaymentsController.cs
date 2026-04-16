@@ -67,7 +67,7 @@ public class PaymentsController : ControllerBase
     }
 
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {
         var p = await _db.Payments.FindAsync(id);
